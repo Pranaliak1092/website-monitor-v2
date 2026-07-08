@@ -10,3 +10,4 @@ check.js
 # PM2 logs
 pm2/
 *.log
+.env
