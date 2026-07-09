@@ -11,3 +11,4 @@ check.js
 pm2/
 *.log
 .env
+uptime-state.json
