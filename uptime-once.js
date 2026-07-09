@@ -47,7 +47,6 @@ function saveState(state) {
 
 function buildAlertHtml(alertQueue) {
   const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-  const cooldownHours = parseFloat(process.env.UPTIME_ALERT_COOLDOWN_HOURS || "6", 10);
   
   let rowsHtml = "";
   alertQueue.forEach((alert) => {
@@ -69,12 +68,16 @@ function buildAlertHtml(alertQueue) {
         ? "#fef3c7" 
         : "#d1fae5";
 
+    // Combine code and message for "Error / Type of Error"
+    const errorDetails = alert.code === 200 || alert.code === "UP"
+      ? "Healthy / Recovered"
+      : `${alert.code}: ${alert.message}`;
+
     rowsHtml += `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 12px; font-weight: 700; color: #1e3a8a;"><a href="${alert.url}" target="_blank" style="color: #1e3a8a; text-decoration: underline;">${alert.url}</a></td>
         <td style="padding: 12px;"><span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; background: ${badgeBg}; color: ${labelColor};">${typeLabel}</span></td>
-        <td style="padding: 12px; font-family: monospace; color: #b91c1c; font-weight: 600;">${alert.code}</td>
-        <td style="padding: 12px; color: #475569; font-size: 13px;">${alert.message}</td>
+        <td style="padding: 12px; color: #475569; font-size: 13px; font-family: monospace; word-break: break-all;">${errorDetails}</td>
       </tr>
     `;
   });
@@ -86,41 +89,34 @@ function buildAlertHtml(alertQueue) {
   <meta charset="utf-8">
   <title>Website Status Update Alert</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfcfd; color: #1e293b; margin: 0; padding: 20px;">
-  <div style="max-width: 700px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #fee2e2; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 24px; text-align: center;">
-      <span style="font-size: 40px; display: block; margin-bottom: 8px;">📡</span>
-      <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Website Status Update</h1>
-      <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.85;">Aggregated status changes and down reminders from the uptime check</p>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px;">
+  <div style="max-width: 650px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    
+    <!-- Clean Minimal Header -->
+    <div style="padding: 20px; border-bottom: 2px solid #f1f5f9; background: #f8fafc;">
+      <h1 style="margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;">📡 Website Status Update</h1>
+      <p style="margin: 4px 0 0; font-size: 12px; color: #64748b;">Aggregated status changes from the website monitor</p>
     </div>
     
-    <div style="padding: 24px;">
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+    <!-- Table Content -->
+    <div style="padding: 20px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
         <thead>
-          <tr style="border-bottom: 2px solid #cbd5e1; text-align: left;">
+          <tr style="border-bottom: 2px solid #e2e8f0; text-align: left; background: #f8fafc;">
             <th style="padding: 10px 12px; font-weight: 700; color: #475569;">Website</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #475569; width: 180px;">Event</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #475569; width: 100px;">Code</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #475569;">Error/Message</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #475569; width: 160px;">Event</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #475569;">Error / Type of Error</th>
           </tr>
         </thead>
         <tbody>
           ${rowsHtml}
         </tbody>
       </table>
-      
-      <div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 12.5px; color: #64748b; line-height: 1.6;">
-        💡 <strong>Notification Settings:</strong>
-        <ul style="margin: 6px 0 0; padding-left: 20px;">
-          <li>Notifications are aggregated so you receive exactly one email per check run.</li>
-          <li>Repeat alerts for down sites are throttled to once every <strong>${cooldownHours} hours</strong> (configurable via <code>UPTIME_ALERT_COOLDOWN_HOURS</code> in your settings).</li>
-        </ul>
-      </div>
     </div>
     
-    <div style="background: #f8fafc; color: #94a3b8; font-size: 11px; text-align: center; padding: 18px; border-top: 1px solid #e2e8f0; line-height: 1.4;">
-      Somaiya UptimeMonitor • Run executed on ${now}<br>
-      Automated status tracking system (v2)
+    <!-- Footer -->
+    <div style="background: #f8fafc; color: #94a3b8; font-size: 11px; text-align: center; padding: 16px; border-top: 1px solid #e2e8f0;">
+      Somaiya UptimeMonitor • Run executed on ${now}
     </div>
   </div>
 </body>
