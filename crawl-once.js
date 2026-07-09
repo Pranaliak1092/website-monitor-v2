@@ -5,7 +5,7 @@ const Crawler = require("./crawler");
 const { sendBatchReport } = require("./reporter");
 
 const RAW_URLS = process.env.CRAWL_URLS || process.env.URLS || "";
-const URLS = RAW_URLS.split(",").map((u) => u.trim()).filter(Boolean);
+const URLS = RAW_URLS.split(/[,\r\n]+/).map((u) => u.trim()).filter(Boolean);
 const MAX_PAGES = parseInt(process.env.CRAWL_MAX_PAGES || "500", 10);
 
 if (URLS.length === 0) {
