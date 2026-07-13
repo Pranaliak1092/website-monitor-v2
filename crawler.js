@@ -150,7 +150,11 @@ class Crawler {
    */
   async crawlDomain(rootUrl) {
     // Normalize root (strip trailing slash for consistent comparisons)
-    const root = rootUrl.endsWith("/") ? rootUrl.slice(0, -1) : rootUrl;
+    let formattedRootUrl = rootUrl.trim();
+    if (!/^https?:\/\//i.test(formattedRootUrl)) {
+      formattedRootUrl = `https://${formattedRootUrl}`;
+    }
+    const root = formattedRootUrl.endsWith("/") ? formattedRootUrl.slice(0, -1) : formattedRootUrl;
 
     /** @type {Set<string>} Pages already crawled */
     const visitedPages = new Set();

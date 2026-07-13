@@ -156,9 +156,13 @@ function buildSubject(alertQueue) {
 }
 
 async function checkWebsite(url) {
-  console.log(`🔍 Checking: ${url}`);
+  let targetUrl = url.trim();
+  if (!/^https?:\/\//i.test(targetUrl)) {
+    targetUrl = `https://${targetUrl}`;
+  }
+  console.log(`🔍 Checking: ${targetUrl}`);
   try {
-    const res = await axios.get(url, { timeout: 15000 });
+    const res = await axios.get(targetUrl, { timeout: 15000 });
     if (res.status >= 200 && res.status < 400) {
       console.log(`✅ ${url} is UP`);
       return { url, status: "UP", message: `HTTP ${res.status}`, code: res.status };
